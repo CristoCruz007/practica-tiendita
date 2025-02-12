@@ -1,9 +1,11 @@
 import axios from "axios";
 import { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 const ApiProductos = "http://localhost:5268/api/Productoes";
 const ApiCategoria = "http://localhost:5268/api/Categorias";
 const ProductosAgregar = () => {
-    
+    const navigate = useNavigate();
+
     const [producto,setProductos] = useState({
         nombre: "",
         descripcion: "",
@@ -11,6 +13,7 @@ const ProductosAgregar = () => {
         stock: "",
         imagen: "",
         categoriaId: "",
+        status: true,
     })
     const handleChange = (e) => {
         setProductos({ ...producto, [e.target.name]: e.target.value });
@@ -20,7 +23,7 @@ const ProductosAgregar = () => {
         try{
             await axios.post(ApiProductos,producto);
             alert("El producto agregado con exito");
-
+            navigate("/productos");
         }catch(error){
             console.error("Error al agregar el productoos",error)
         }

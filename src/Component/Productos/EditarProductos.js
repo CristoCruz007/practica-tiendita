@@ -1,19 +1,20 @@
 import axios from "axios";
 import { useEffect, useState } from "react";
-import { useParams } from "react-router-dom";
+import { useParams, useNavigate } from "react-router-dom";
 
 const ApiProductos = "http://localhost:5268/api/Productoes";
-const ApiCategorias = "http://localhost:5268/api/Categorias"; // Endpoint para obtener categorías
+const ApiCategorias = "http://localhost:5268/api/Categorias";
 
 const EditarProductos = () => {
     const { id } = useParams(); // Captura el ID desde la URL
+    const navigate = useNavigate();
     const [producto, setProducto] = useState(null);
-    const [categorias, setCategorias] = useState([]); // Lista de categorías
+    const [categorias, setCategorias] = useState([]);
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
         getProducto();
-        getCategorias(); // Carga las categorías disponibles
+        getCategorias();
     }, [id]);
 
     const getProducto = async () => {
@@ -30,25 +31,31 @@ const EditarProductos = () => {
     const getCategorias = async () => {
         try {
             const respuesta = await axios.get(ApiCategorias);
-            setCategorias(respuesta.data); // Guarda las categorías en el estado
+            setCategorias(respuesta.data);
         } catch (error) {
             console.error("Error al obtener las categorías:", error);
         }
     };
 
-    if (loading) {
-        return <p className="text-center">Cargando...</p>;
-    }
+    const handleSubmit = async (e) => {
+        e.preventDefault();
+        try {
+            await axios.put(`${ApiProductos}/${id}`, producto);
+            alert("Producto actualizado correctamente");
+            navigate("/productos"); // Redirige a la lista de productos
+        } catch (error) {
+            console.error("Error al actualizar el producto:", error);
+        }
+    };
 
-    if (!producto) {
-        return <p className="text-center text-danger">No se encontró el producto</p>;
-    }
+    if (loading) return <p className="text-center">Cargando...</p>;
+    if (!producto) return <p className="text-center text-danger">No se encontró el producto</p>;
 
     return (
         <div className="container">
             <div className="card shadow-lg p-4">
                 <h1 className="text-center">Editar Producto</h1>
-                <form>
+                <form onSubmit={handleSubmit}>
                     <div className="mb-3">
                         <label className="form-label">Nombre</label>
                         <input
@@ -78,7 +85,7 @@ const EditarProductos = () => {
                             required
                             name="precio"
                             value={producto.precio}
-                            onChange={(e) => setProducto({ ...producto, precio: e.target.value })}
+                            onChange={(e) => setProducto({ ...producto, precio: Number(e.target.value) })}
                         />
                     </div>
                     <div className="mb-3">
@@ -89,7 +96,7 @@ const EditarProductos = () => {
                             required
                             name="stock"
                             value={producto.stock}
-                            onChange={(e) => setProducto({ ...producto, stock: e.target.value })}
+                            onChange={(e) => setProducto({ ...producto, stock: Number(e.target.value) })}
                         />
                     </div>
                     <div className="mb-3">
@@ -103,23 +110,25 @@ const EditarProductos = () => {
                             onChange={(e) => setProducto({ ...producto, imagen: e.target.value })}
                         />
                     </div>
-                    {/* Select para elegir la categoría */}
                     <div className="mb-3">
                         <label className="form-label">Categoría</label>
                         <select
                             className="form-select"
-                            name="categoria"
-                            value={producto.categoriaId} // Mantiene la categoría seleccionada
-                            onChange={(e) => setProducto({ ...producto, categoriaId: e.target.value })}
+                            name="categoriaId"
+                            value={producto.categoriaId || ""}
+                            onChange={(e) => setProducto({ ...producto, categoriaId: Number(e.target.value) })}
                         >
                             <option value="">Seleccione una categoría</option>
                             {categorias.map((categoria) => (
-                                <option key={categoria.id} value={categoria.id}>
+                                <option key={categoria.categoriaId} value={categoria.categoriaId}>
                                     {categoria.nombre}
                                 </option>
                             ))}
                         </select>
                     </div>
+                    <button type="submit" className="btn btn-success w-100">
+                        Guardar cambios
+                    </button>
                 </form>
             </div>
         </div>
