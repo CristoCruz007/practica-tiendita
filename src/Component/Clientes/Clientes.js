@@ -4,6 +4,7 @@ import { Link } from "react-router-dom";
 
 const Cliente = () => {
     const Api = "http://localhost:5268/api/Clientes";
+
     const [Cliente, setCliente] = useState([]);
 
     useEffect(() => {
@@ -19,11 +20,26 @@ const Cliente = () => {
         }
     };
 
+    const desativarCliente = async(id) => {
+        const confirmancion = window.confirm("¿Estas seguro que desea aliminar este Cliente?");
+        if(!confirmancion) return;
+        try{
+            await axios.put(`${Api}/desativar/${id}`);
+
+            setCliente(Cliente.filter(cliente=> cliente.clienteId !== id));
+
+        }catch(error){
+            console.error("Upps error en desativar Cliente",error);
+        }
+
+
+    }
+
     return (
         <div className="container mt-2 p-2"> {/* Contenedor centrado con margen y padding */}
             <h1 className="text-center mb-4">Clientes</h1>
             <div>
-                <Link>
+                <Link to="/AgregarCliente">
                     <button className="btn btn-success mb-3">Agregar</button>
                 </Link>
             </div>
@@ -57,14 +73,14 @@ const Cliente = () => {
                             <td>{cliente.codigoPostal}</td>
                             <td>{cliente.pais}</td>
                             <td>
-                                <Link>
+                                <Link to={`/EditarCliente/${cliente.clienteId}`}>
                                     <button className="btn btn-primary mt-2">Editar</button>
                                 </Link>
                             </td>
                             <td>
-                                <Link>
-                                    <button className="btn btn-danger mt-2">Editar</button>
-                                </Link>
+                                
+                                <button className="btn btn-danger mt-2" onClick={()=> desativarCliente(cliente.clienteId)}>Editar</button>
+                                
                             </td>
                            
                         </tr>
